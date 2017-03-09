@@ -8,5 +8,5 @@ What service can do:
 
 2. Create testruns from testsuits
 
-3. A lot of statistics
+3. Calculate and display a lot of different statistics
 
