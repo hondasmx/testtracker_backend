@@ -21,6 +21,12 @@ def add_testcase(testcase_dict, project):
     return collection.add_dict(dictionary=testcase_dict, document_name=get_last_testcase_index(project) + 1)
 
 
+def update_testcase(testcase_dict, project):
+    collection = get_collection(project, 'testcases')
+    document_name = testcase_dict['id']
+    return collection.add_dict(dictionary=testcase_dict, document_name=document_name)
+
+
 def update_testcase_field(project_name, testcase, field, new_value):
     d = get_collection(project_name, 'testcases')
     return d.update_document(testcase, field, new_value)

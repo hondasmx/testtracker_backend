@@ -3,12 +3,15 @@ from flask import Flask, jsonify
 from flask import abort
 from flask import make_response
 from flask import request
+from flask_cors import CORS, cross_origin
+
 
 from api.project import get_all_projects, get_project, create_project, update_project_field
 from api.testcase import get_testcase, add_testcase, get_last_testcase_index, get_project_testcases, \
-    update_testcase_field
+    update_testcase_field, update_testcase
 
 app = Flask(__name__)
+CORS(app)
 
 
 # testcases
@@ -22,29 +25,31 @@ def testcase_get(testcase_id, project):
     # abort(404)
 
 
-@app.route('/api/testcases/<project>/<int:testcase_id>', methods=['PUT'])
-def projects_update(project, testcase_id):
-    if not request.json or not 'field' or not 'new_value' in request.json:
+@app.route('/api/testcases/<project>/<int:testcase_id>', methods=['POST'])
+def testcase_update(project, testcase_id):
+    if not request.json:
         abort(400)
     data = request.json
-    field = data['field']
-    new_value = data['new_value']
-    update_testcase_field(project, testcase_id, field, new_value)
-    return _make_responce({'project': project, 'testcase_id': testcase_id, 'field': field, 'new_value': new_value})
+    data['id'] = testcase_id
+    update_testcase(data, project)
+    return _make_responce({'project': project, 'testcase_id': testcase_id})
 
 
 @app.route('/api/testcases/<project>', methods=['POST'])
 def testcase_create(project):
     if not request.json or not 'title' in request.json:
         abort(400)
-    if not 'project' in request.json:
-        abort(400)
     testcase = request.json
     testcase['createdTime'] = datetime.datetime.now()
     testcase['lastModifiedTime'] = datetime.datetime.now()
     testcase['lastModifiedBy'] = 'againanov'
-    testcase['attributes'] = []
-    testcase['steps'] = []
+    testcase['attributes'] = [
+        {'key': 'Priority', 'values': []},
+        {'key': 'Severity', 'values': []},
+        {'key': 'OS', 'values': ['win', 'mac']},
+        {'key': 'Component', 'values': []},
+    ]
+    testcase['steps'] = [{'step': 'step', 'expected_result': 'expected_result', 'is_editing': False}]
     testcase['description'] = ''
     testcase['preconditions'] = ''
     add_testcase(request.json, project)
